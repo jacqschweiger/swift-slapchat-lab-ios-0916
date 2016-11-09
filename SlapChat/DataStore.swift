@@ -15,6 +15,8 @@ class DataStore {
     
     private init() {}
     
+    var messages = [Message]()
+    
     // MARK: - Core Data stack
     
     lazy var persistentContainer: NSPersistentContainer = {
@@ -24,7 +26,7 @@ class DataStore {
          application to it. This property is optional since there are legitimate
          error conditions that could cause the creation of the store to fail.
          */
-        let container = NSPersistentContainer(name: "SlapChat")
+        let container = NSPersistentContainer(name: "slapChat")
         container.loadPersistentStores(completionHandler: { (storeDescription, error) in
             if let error = error as NSError? {
                 // Replace this implementation with code to handle the error appropriately.
@@ -60,4 +62,34 @@ class DataStore {
         }
     }
     
+    func fetchData(){
+        print("fetching data")
+        let context = persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<Message>(entityName: "Message")
+            do {
+                
+                let messages = try context.fetch(fetchRequest)
+                if messages.count == 0 {
+                    generateTestData()
+                    
+                }else{
+                   self.messages = messages
+                }
+            
+        } catch {
+        }
+        //TODO: sort messages by creation dates
+        print("fetch messages = \(messages.count)")
+    }
+    
+    func generateTestData(){
+        let msg1 = Message(context: persistentContainer.viewContext)
+        msg1.content = "this is msg1"
+        msg1.createdAt = NSDate()
+        
+        saveContext()
+        fetchData()
+        print("generate test messages = \(messages.count)")
+        
+    }
 }
